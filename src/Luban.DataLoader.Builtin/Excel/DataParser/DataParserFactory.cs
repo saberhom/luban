@@ -14,6 +14,7 @@ public static class DataParserFactory
     private readonly static IDataParser s_liteParser = new LiteParser();
     private readonly static IDataParser s_jsonParser = new JsonParser();
     private readonly static IDataParser s_luaParser = new LuaParser();
+    private readonly static IDataParser s_funcInvokeParser = new FuncInvokeParser();
 
     public static IDataParser GetDefaultDataParser()
     {
@@ -33,6 +34,7 @@ public static class DataParserFactory
             "lite" => s_liteParser,
             "json" => s_jsonParser,
             "lua" => s_luaParser,
+            "funcinvoke" => s_funcInvokeParser,
             _ => throw new NotSupportedException($"Unsupported data parser type: {parserType}")
         };
     }
