@@ -16,7 +16,7 @@ public class FuncInvokeParser : DataParserBase
     public override DType ParseAny(TType type, List<Cell> cells, TitleRow title)
     {
         var cell = cells[title.SelfTitle.FromIndex];
-        string cellValue = cell?.ToString()?.Trim();
+        string cellValue = cell.Value?.ToString()?.Trim();
         
         if (string.IsNullOrEmpty(cellValue))
         {
@@ -32,13 +32,21 @@ public class FuncInvokeParser : DataParserBase
             throw new Exception($"Invalid funcInvoke format: {cellValue}");
         }
 
-        return type.Apply(FuncInvokeDataCreator.Ins, funcInvokeData, type.DefBean.Assembly);
+        // 只有TBean类型才支持funcInvoke格式
+        if (type is TBean tBean)
+        {
+            return tBean.Apply(FuncInvokeDataCreator.Ins, funcInvokeData, tBean.DefBean.Assembly);
+        }
+        else
+        {
+            throw new Exception($"FuncInvoke format only supports bean types, got {type.GetType().Name}");
+        }
     }
 
     public override DBean ParseBean(TBean type, List<Cell> cells, TitleRow title)
     {
         var cell = cells[title.SelfTitle.FromIndex];
-        string cellValue = cell?.ToString()?.Trim();
+        string cellValue = cell.Value?.ToString()?.Trim();
         
         if (string.IsNullOrEmpty(cellValue))
         {
@@ -60,7 +68,7 @@ public class FuncInvokeParser : DataParserBase
     public override List<DType> ParseCollectionElements(TType collectionType, List<Cell> cells, TitleRow title)
     {
         var cell = cells[title.SelfTitle.FromIndex];
-        string cellValue = cell?.ToString()?.Trim();
+        string cellValue = cell.Value?.ToString()?.Trim();
         
         if (string.IsNullOrEmpty(cellValue))
         {
@@ -83,7 +91,15 @@ public class FuncInvokeParser : DataParserBase
                 throw new Exception($"Invalid funcInvoke format: {trimmedStr}");
             }
 
-            elements.Add(collectionType.ElementType.Apply(FuncInvokeDataCreator.Ins, funcInvokeData, collectionType.ElementType.DefBean.Assembly));
+            // 只有TBean类型才支持funcInvoke格式
+            if (collectionType.ElementType is TBean elementBean)
+            {
+                elements.Add(elementBean.Apply(FuncInvokeDataCreator.Ins, funcInvokeData, elementBean.DefBean.Assembly));
+            }
+            else
+            {
+                throw new Exception($"FuncInvoke format only supports bean types, got {collectionType.ElementType.GetType().Name}");
+            }
         }
 
         return elements;

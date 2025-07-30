@@ -92,7 +92,8 @@ class FuncInvokeDataCreator : ITypeFuncVisitor<FuncInvokeData, DefAssembly, DTyp
                 {
                     // 根据字段类型解析参数值
                     var parsedValue = ParseValueByType(f.CType, paramValue);
-                    fields.Add(f.CType.Apply(this, parsedValue, ass));
+                    // 直接创建对应的DType对象，而不是使用Apply方法
+                    fields.Add(CreateDType(f.CType, parsedValue));
                 }
                 catch (DataCreateException dce)
                 {
@@ -175,6 +176,36 @@ class FuncInvokeDataCreator : ITypeFuncVisitor<FuncInvokeData, DefAssembly, DTyp
                 return DataUtil.CreateDateTime(value);
             case TEnum:
                 return value;
+            default:
+                throw new NotSupportedException($"Type {type.GetType().Name} not supported in FuncInvoke format");
+        }
+    }
+
+    // 根据类型和值创建DType对象
+    private DType CreateDType(TType type, object value)
+    {
+        switch (type)
+        {
+            case TBool t:
+                return DBool.ValueOf((bool)value);
+            case TByte t:
+                return DByte.ValueOf((byte)value);
+            case TShort t:
+                return DShort.ValueOf((short)value);
+            case TInt t:
+                return DInt.ValueOf((int)value);
+            case TLong t:
+                return DLong.ValueOf((long)value);
+            case TFloat t:
+                return DFloat.ValueOf((float)value);
+            case TDouble t:
+                return DDouble.ValueOf((double)value);
+            case TString t:
+                return DString.ValueOf(t, (string)value);
+            case TDateTime t:
+                return (DDateTime)value;
+            case TEnum t:
+                return new DEnum(t, (string)value);
             default:
                 throw new NotSupportedException($"Type {type.GetType().Name} not supported in FuncInvoke format");
         }
