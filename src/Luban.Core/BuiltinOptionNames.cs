@@ -8,6 +8,10 @@ public static class BuiltinOptionNames
 
     public const string OutputDataDir = "outputDataDir";
 
+    public const string OutputDataFile = "outputDataFile";
+
+    public const string Format = "format";
+
     public const string OutputCodeExtension = "outputCodeExtension";
 
     public const string OutputDataExtension = "fileExt";

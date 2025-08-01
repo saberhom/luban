@@ -12,6 +12,8 @@ public class DefTable : DefTypeBase
 {
     private static readonly NLog.Logger s_logger = NLog.LogManager.GetCurrentClassLogger();
 
+    public static string DataOutputFileFormat => EnvManager.Current.GetOptionOrDefault(BuiltinOptionNames.OutputDataFile, BuiltinOptionNames.Format, true, "default");
+
     public DefTable(RawTable b)
     {
         Name = b.Name;
@@ -65,7 +67,16 @@ public class DefTable : DefTypeBase
 
     public List<ITableValidator> Validators { get; } = new();
 
-    public string OutputDataFile => string.IsNullOrWhiteSpace(_outputFile) ? FullName.Replace('.', '_').ToLower() : _outputFile;
+    public string OutputDataFile =>
+        !string.IsNullOrWhiteSpace(_outputFile)
+            ? _outputFile
+        : DataOutputFileFormat?.ToLower() switch
+        {
+            "default" => FullName?.Replace('.', '_').ToLower() ?? "",
+            "fullname" => FullName?.Replace('.', '/').ToLower() ?? "",
+            "valuetype" => ValueType?.Replace('.', '/').ToLower() ?? "",
+            _ => FullName?.Replace('.', '_').ToLower() ?? "",
+        };
 
     public override void Compile()
     {
